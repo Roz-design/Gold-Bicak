@@ -35,9 +35,14 @@ export default function RegisterPage() {
 
     const data = await res.json();
     if (data.success) {
-      setPhone(form.phone);
-      setDevCode(data.data.devCode || "");
-      setStep("verify");
+      if (data.data.requiresVerification) {
+        setPhone(form.phone);
+        setDevCode(data.data.devCode || "");
+        setStep("verify");
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     } else {
       setError(data.error || "Kayıt başarısız");
     }
@@ -150,7 +155,7 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full rounded-lg bg-gold py-3 font-medium text-brand-black hover:bg-gold-dark disabled:opacity-50"
         >
-          {loading ? "Kaydediliyor..." : "Kayıt Ol ve SMS Doğrula"}
+          {loading ? "Kaydediliyor..." : "Kayıt Ol"}
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-slate-500">

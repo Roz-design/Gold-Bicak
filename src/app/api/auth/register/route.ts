@@ -4,6 +4,7 @@ import { hashPassword, signToken, setAuthCookie } from "@/lib/auth";
 import { apiError, apiSuccess } from "@/lib/api";
 import { validateTcKimlik } from "@/lib/utils";
 import { sendVerificationSms } from "@/lib/sms";
+import { isPhoneVerificationRequired } from "@/lib/phone-verification";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const passwordHash = await hashPassword(password);
+  const phoneVerificationRequired = isPhoneVerificationRequired();
 
   const user = await prisma.user.create({
     data: {
@@ -45,14 +47,43 @@ export async function POST(request: NextRequest) {
       phone: normalizedPhone,
       email,
       passwordHash,
-      phoneVerified: false,
+      phoneVerified: !phoneVerificationRequired,
     },
   });
+
+  if (!phoneVerificationRequired) {
+    const token = signToken({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      status: user.status,
+      phoneVerified: true,
+    });
+
+    await setAuthCookie(token);
+
+    return apiSuccess(
+      {
+        requiresVerification: false,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+        },
+      },
+      201
+    );
+  }
 
   const smsResult = await sendVerificationSms(normalizedPhone, user.id);
 
   return apiSuccess(
     {
+      requiresVerification: true,
       userId: user.id,
       message: smsResult.message,
       devCode: smsResult.code,

@@ -7,6 +7,7 @@ import {
   findUserByLoginIdentifier,
 } from "@/lib/auth";
 import { apiError, apiSuccess } from "@/lib/api";
+import { isPhoneVerificationRequired } from "@/lib/phone-verification";
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -32,7 +33,11 @@ export async function POST(request: NextRequest) {
     return apiError("Hesabınız pasif durumdadır", 403);
   }
 
-  if (!user.phoneVerified && user.role !== "ADMIN") {
+  if (
+    isPhoneVerificationRequired() &&
+    !user.phoneVerified &&
+    user.role !== "ADMIN"
+  ) {
     return apiError("Telefon doğrulaması yapılmamış. Lütfen kayıt işlemini tamamlayın.", 403);
   }
 

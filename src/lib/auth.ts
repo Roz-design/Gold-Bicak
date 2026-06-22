@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { prisma } from "./db";
 import type { UserRole, UserStatus } from "@prisma/client";
+import { isPhoneVerificationRequired } from "./phone-verification";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-change-me";
 const TOKEN_NAME = "bicak_auth_token";
@@ -113,7 +114,9 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHORIZED");
-  if (!user.phoneVerified) throw new Error("PHONE_NOT_VERIFIED");
+  if (isPhoneVerificationRequired() && !user.phoneVerified) {
+    throw new Error("PHONE_NOT_VERIFIED");
+  }
   return user;
 }
 
