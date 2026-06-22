@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" fill="none">
+  <defs>
+    <linearGradient id="goldGradFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C547"/>
+      <stop offset="45%" stop-color="#C9A227"/>
+      <stop offset="100%" stop-color="#9A7B1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="64" rx="10" fill="#FFFFFF"/>
+  <rect x="6" y="6" width="52" height="52" rx="12" fill="#0A0A0A"/>
+  <rect x="9" y="9" width="46" height="46" rx="9" fill="none" stroke="url(#goldGradFull)" stroke-width="1"/>
+  <path d="M18 22 L42 22" stroke="#C9A227" stroke-width="0.5" opacity="0.5"/>
+  <path d="M20 32 L38 24" stroke="url(#goldGradFull)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M38 24 L36.5 31 L29 29.5 L30.5 25 L38 24Z" fill="#FFFFFF"/>
+  <path d="M20 32 L21.5 26 L27 27.5 L25.5 31 L20 32Z" fill="#C9A227"/>
+  <path d="M18 42 L42 42" stroke="#C9A227" stroke-width="0.5" opacity="0.5"/>
+  <text x="31" y="49" text-anchor="middle" fill="url(#goldGradFull)" font-family="Georgia, 'Times New Roman', serif" font-size="7" font-weight="bold" letter-spacing="1.2">GOLD</text>
+  <line x1="68" y1="32" x2="74" y2="32" stroke="#C9A227" stroke-width="0.75" opacity="0.5"/>
+  <circle cx="71" cy="32" r="1.5" fill="#C9A227" opacity="0.7"/>
+  <line x1="74" y1="32" x2="80" y2="32" stroke="#C9A227" stroke-width="0.75" opacity="0.5"/>
+  <text x="88" y="36" fill="url(#goldGradFull)" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="bold" letter-spacing="1">Gold</text>
+  <text x="88" y="54" fill="#0A0A0A" font-family="Georgia, 'Times New Roman', serif" font-size="18" letter-spacing="2.5">B&#305;&#231;ak</text>
+  <path d="M88 58 L170 58" stroke="#C9A227" stroke-width="0.75" opacity="0.35"/>
+</svg>

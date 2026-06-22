@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C547"/>
+      <stop offset="45%" stop-color="#C9A227"/>
+      <stop offset="100%" stop-color="#9A7B1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="18" fill="#0A0A0A"/>
+  <rect x="4" y="4" width="112" height="112" rx="14" fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
+  <rect x="9" y="9" width="102" height="102" rx="11" fill="none" stroke="#C9A227" stroke-width="0.5" opacity="0.45"/>
+  <path d="M36 28h48" stroke="#C9A227" stroke-width="0.75" opacity="0.6"/>
+  <circle cx="60" cy="28" r="2" fill="#C9A227" opacity="0.8"/>
+  <path d="M42 46 L78 46" stroke="#C9A227" stroke-width="0.5" opacity="0.35"/>
+  <path d="M38 58 L72 34" stroke="url(#goldGrad)" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M72 34 L69 46 L58 43 L61 35 L72 34Z" fill="#FFFFFF"/>
+  <path d="M38 58 L41 47 L50 50 L47 57 L38 58Z" fill="#C9A227"/>
+  <path d="M36 68h48" stroke="#C9A227" stroke-width="0.75" opacity="0.6"/>
+  <circle cx="60" cy="68" r="2" fill="#C9A227" opacity="0.8"/>
+  <text x="60" y="86" text-anchor="middle" fill="url(#goldGrad)" font-family="Georgia, 'Times New Roman', serif" font-size="15" font-weight="bold" letter-spacing="3">GOLD</text>
+  <text x="60" y="104" text-anchor="middle" fill="#FFFFFF" font-family="Georgia, 'Times New Roman', serif" font-size="12" letter-spacing="1.5">B&#305;&#231;ak</text>
+</svg>
