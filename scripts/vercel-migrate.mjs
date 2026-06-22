@@ -78,3 +78,9 @@ try {
     process.exit(1);
   }
 }
+
+try {
+  execSync("node scripts/seed-if-empty.mjs", { stdio: "inherit", env: process.env });
+} catch (seedError) {
+  console.error("[migrate] Seed başarısız — deploy devam ediyor olabilir; npm run db:seed ile manuel deneyin.");
+}
