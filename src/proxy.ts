@@ -5,7 +5,7 @@ import { isDirectAdminApiPath, isDirectAdminPath } from "@/lib/admin-path";
 
 const TOKEN_NAME = "bicak_auth_token";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isDirectAdminPath(pathname) || isDirectAdminApiPath(pathname)) {
