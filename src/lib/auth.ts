@@ -88,18 +88,20 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   const payload = verifyToken(token);
   if (!payload) return null;
 
-  const user = await prisma.user.findUnique({
-    where: { id: payload.id },
-    select: {
-      id: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      role: true,
-      status: true,
-      phoneVerified: true,
-    },
-  });
+  const user = await prisma.user
+    .findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        status: true,
+        phoneVerified: true,
+      },
+    })
+    .catch(() => null);
 
   if (!user || user.status === "BLOCKED" || user.status === "INACTIVE") {
     return null;

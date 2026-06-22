@@ -1,15 +1,23 @@
 import { prisma } from "@/lib/db";
 import ProductCard from "@/components/product/ProductCard";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductsPage() {
-  const products = await prisma.product.findMany({
-    where: { hidden: false },
-    include: {
-      category: true,
-      images: { orderBy: { sortOrder: "asc" }, take: 1 },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  let products: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+
+  try {
+    products = await prisma.product.findMany({
+      where: { hidden: false },
+      include: {
+        category: true,
+        images: { orderBy: { sortOrder: "asc" }, take: 1 },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    console.error("[products] Veritabanı hatası:", error);
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">

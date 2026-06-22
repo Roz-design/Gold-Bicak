@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../src/lib/db";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 async function main() {
   const adminPasswordHash = await bcrypt.hash("Rozerin21.", 12);
@@ -375,12 +373,13 @@ async function main() {
     update: {
       title: "Profesyonel Bıçak Çözümleri",
       subtitle: "GOLD BIÇAKÇILIK — Perakende ve toptan satışa uygun fiyatlar",
+      image: "/categories/profesyonel-bicaklar.jpg",
     },
     create: {
       id: "hero-banner-1",
       title: "Profesyonel Bıçak Çözümleri",
       subtitle: "GOLD BIÇAKÇILIK — Perakende ve toptan satışa uygun fiyatlar",
-      image: "https://images.unsplash.com/photo-1593618994880-f28548e9647b?w=1400&h=600&fit=crop",
+      image: "/categories/profesyonel-bicaklar.jpg",
       link: "/urunler",
       active: true,
       sortOrder: 0,

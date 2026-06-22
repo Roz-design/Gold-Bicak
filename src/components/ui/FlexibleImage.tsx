@@ -30,6 +30,7 @@ export default function FlexibleImage({
         alt={alt}
         className={fill ? `absolute inset-0 h-full w-full ${className ?? ""}` : className}
         loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : undefined}
         decoding="async"
       />
     );
@@ -43,6 +44,7 @@ export default function FlexibleImage({
       className={className}
       sizes={sizes}
       priority={priority}
+      loading={priority ? "eager" : "lazy"}
       unoptimized={src.startsWith("/uploads/") || src.endsWith(".svg")}
     />
   );

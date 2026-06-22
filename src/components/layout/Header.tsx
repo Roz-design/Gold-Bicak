@@ -11,7 +11,9 @@ export default async function Header() {
 
   let cartCount = 0;
   if (user) {
-    cartCount = await prisma.cartItem.count({ where: { userId: user.id } });
+    cartCount = await prisma.cartItem
+      .count({ where: { userId: user.id } })
+      .catch(() => 0);
   }
 
   const logoUrl = settings.logo || "/logo.svg";

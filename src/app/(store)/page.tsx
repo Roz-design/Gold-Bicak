@@ -1,48 +1,81 @@
 import Link from "next/link";
-import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { getSiteSettings } from "@/lib/settings";
 import ProductCard from "@/components/product/ProductCard";
 import CategoryGrid from "@/components/home/CategoryGrid";
+import FlexibleImage from "@/components/ui/FlexibleImage";
 import { ArrowRight, Truck, Shield, Headphones } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
+const HERO_FALLBACK_IMAGE = "/categories/profesyonel-bicaklar.jpg";
+
+async function getHomePageData() {
+  const settings = await getSiteSettings();
+
+  try {
+    const [featuredProducts, categories, banners, campaigns] = await Promise.all([
+      prisma.product.findMany({
+        where: { hidden: false, featured: true },
+        include: { images: { orderBy: { sortOrder: "asc" }, take: 1 } },
+        take: 9,
+      }),
+      prisma.category.findMany({
+        where: { active: true },
+        orderBy: { sortOrder: "asc" },
+      }),
+      prisma.banner.findMany({
+        where: { active: true },
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+      }),
+      prisma.campaign.findMany({
+        where: {
+          active: true,
+          OR: [
+            { startDate: null, endDate: null },
+            { startDate: { lte: new Date() }, endDate: null },
+            { startDate: null, endDate: { gte: new Date() } },
+            { startDate: { lte: new Date() }, endDate: { gte: new Date() } },
+          ],
+        },
+        take: 3,
+      }),
+    ]);
+
+    return { featuredProducts, categories, banners, campaigns, settings };
+  } catch (error) {
+    console.error("[homepage] Veritabanı hatası:", error);
+    return {
+      featuredProducts: [],
+      categories: [],
+      banners: [],
+      campaigns: [],
+      settings,
+    };
+  }
+}
+
 export default async function HomePage() {
-  const [featuredProducts, categories, banners, campaigns, settings] = await Promise.all([
-    prisma.product.findMany({
-      where: { hidden: false, featured: true },
-      include: { images: { orderBy: { sortOrder: "asc" }, take: 1 } },
-      take: 9,
-    }),
-    prisma.category.findMany({
-      where: { active: true },
-      orderBy: { sortOrder: "asc" },
-    }),
-    prisma.banner.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" }, take: 1 }),
-    prisma.campaign.findMany({
-      where: {
-        active: true,
-        OR: [
-          { startDate: null, endDate: null },
-          { startDate: { lte: new Date() }, endDate: null },
-          { startDate: null, endDate: { gte: new Date() } },
-          { startDate: { lte: new Date() }, endDate: { gte: new Date() } },
-        ],
-      },
-      take: 3,
-    }),
-    getSiteSettings(),
-  ]);
+  const { featuredProducts, categories, banners, campaigns, settings } =
+    await getHomePageData();
 
   const hero = banners[0];
+  const heroImage = hero?.image || HERO_FALLBACK_IMAGE;
 
   return (
     <div className="bg-white">
       {/* Hero */}
       <section className="relative bg-brand-black text-white">
         <div className="absolute inset-0 opacity-30">
-          {hero && (
-            <Image src={hero.image} alt="" fill className="object-cover" priority sizes="100vw" />
-          )}
+          <FlexibleImage
+            src={heroImage}
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/90 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-32">
@@ -121,7 +154,13 @@ export default async function HomePage() {
               Profesyonel ve günlük kullanıma uygun bıçak koleksiyonumuzu keşfedin
             </p>
           </div>
-          <CategoryGrid categories={categories} />
+          {categories.length > 0 ? (
+            <CategoryGrid categories={categories} />
+          ) : (
+            <p className="mt-8 text-center text-sm text-neutral-500">
+              Kategoriler yükleniyor veya henüz eklenmedi.
+            </p>
+          )}
         </div>
       </section>
 
@@ -134,11 +173,17 @@ export default async function HomePage() {
               Tümünü Gör →
             </Link>
           </div>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {featuredProducts.length > 0 ? (
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-8 text-center text-sm text-neutral-500">
+              Henüz öne çıkan ürün yok. Admin panelden ürün ekleyebilirsiniz.
+            </p>
+          )}
         </div>
       </section>
 

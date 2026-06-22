@@ -32,11 +32,22 @@ Profesyonel bıçak satış e-ticaret sitesi ve yönetim paneli.
 
 ## Kurulum
 
+### Seçenek A — Docker (önerilen, lokal)
+
 ```bash
 cd bicak-satis
 npm install
-cp .env.example .env
-# .env içinde Neon DATABASE_URL ve DIRECT_URL değerlerini doldurun
+npm run db:docker
+npm run db:setup
+npm run dev
+```
+
+### Seçenek B — Neon PostgreSQL (Vercel ile aynı DB)
+
+`.env` içinde `DATABASE_URL` olarak Neon connection string kullanın (Vercel panelindeki değeri kopyalayabilirsiniz), sonra:
+
+```bash
+npm install
 npm run db:setup
 npm run dev
 ```
