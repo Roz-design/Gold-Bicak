@@ -4,7 +4,16 @@ import ProductCard from "@/components/product/ProductCard";
 export const dynamic = "force-dynamic";
 
 export default async function ProductsPage() {
-  let products: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+  let products: Awaited<
+    ReturnType<
+      typeof prisma.product.findMany<{
+        include: {
+          category: true;
+          images: { orderBy: { sortOrder: "asc" }; take: number };
+        };
+      }>
+    >
+  > = [];
 
   try {
     products = await prisma.product.findMany({
