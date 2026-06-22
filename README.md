@@ -25,7 +25,7 @@ Profesyonel bıçak satış e-ticaret sitesi ve yönetim paneli.
 
 - **Frontend:** Next.js 16, React 19, Tailwind CSS 4
 - **Backend:** Next.js API Routes
-- **Veritabanı:** SQLite (geliştirme) / MySQL (üretim)
+- **Veritabanı:** Neon PostgreSQL (Vercel) / PostgreSQL
 - **ORM:** Prisma 6
 
 > **Not:** Laravel tercih edilmişti ancak geliştirme ortamında PHP yüklü değildi. Üretim VPS'te Laravel API'ye geçiş veya mevcut Next.js full-stack yapısı kullanılabilir.
@@ -33,19 +33,32 @@ Profesyonel bıçak satış e-ticaret sitesi ve yönetim paneli.
 ## Kurulum
 
 ```bash
-cd C:\Users\mavs\Projects\bicak-satis
+cd bicak-satis
 npm install
+cp .env.example .env
+# .env içinde Neon DATABASE_URL ve DIRECT_URL değerlerini doldurun
 npm run db:setup
 npm run dev
 ```
 
 Site: http://localhost:3000
 
+## Vercel + Neon PostgreSQL
+
+1. [Neon](https://neon.tech) üzerinde proje oluşturun.
+2. **Pooled** connection string → Vercel `DATABASE_URL` (zorunlu)
+3. İsteğe bağlı: **Direct** string → `DIRECT_URL` (yoksa build script otomatik türetir)
+4. Vercel ortam değişkenleri: `JWT_SECRET`, `ADMIN_SECRET_PATH`, `NEXT_PUBLIC_ADMIN_SECRET_PATH`, `NEXT_PUBLIC_SITE_URL`
+5. Deploy sırasında `npm run build` otomatik olarak `prisma migrate deploy` çalıştırır.
+6. İlk deploy sonrası seed için (bir kez): `npm run db:seed` (Neon SQL Editor veya lokal `.env` ile)
+
+> **Not:** Vercel'de `public/uploads/` kalıcı değildir. Ürün görselleri için harici URL veya Vercel Blob / S3 kullanın.
+
 ## Demo Hesaplar
 
 | Rol | E-posta | Şifre |
 |-----|---------|-------|
-| Admin | admin@probicak.com | Admin123! |
+| Admin | Admin veya admin@probicak.com | Rozerin21. |
 | Müşteri | musteri@example.com | User123! |
 
 ## SMS Doğrulama
@@ -54,10 +67,10 @@ Geliştirmede `SMS_MOCK=true` ile kod konsola yazılır ve kayıt ekranında gö
 
 ## Üretim Dağıtımı
 
-1. `.env` dosyasında `DATABASE_URL` MySQL bağlantısına çevirin
+1. Neon PostgreSQL `DATABASE_URL` (pooled) ve `DIRECT_URL` (direct) tanımlayın
 2. `JWT_SECRET` güçlü bir değer atayın
 3. `SMS_MOCK=false` ve SMS API anahtarlarını ekleyin
-4. Linux VPS + Nginx + PM2 ile deploy edin
+4. Vercel'e deploy edin veya Node.js sunucusunda `npm run build && npm start`
 
 ## Proje Yapısı
 

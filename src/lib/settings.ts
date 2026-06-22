@@ -30,29 +30,33 @@ const DEFAULT_SETTINGS = {
 export type SiteSettings = typeof DEFAULT_SETTINGS;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const settings = await prisma.siteSetting.findMany();
-  if (settings.length === 0) return DEFAULT_SETTINGS;
+  try {
+    const settings = await prisma.siteSetting.findMany();
+    if (settings.length === 0) return DEFAULT_SETTINGS;
 
-  const merged = { ...DEFAULT_SETTINGS };
-  for (const setting of settings) {
-    try {
-      const value = JSON.parse(setting.value);
-      if (setting.key === "companyName") merged.companyName = value;
-      else if (setting.key === "logo") merged.logo = value;
-      else if (setting.key === "phone") merged.phone = value;
-      else if (setting.key === "whatsapp") merged.whatsapp = value;
-      else if (setting.key === "email") merged.email = value;
-      else if (setting.key === "address") merged.address = value;
-      else if (setting.key === "workingHours") merged.workingHours = value;
-      else if (setting.key === "socialMedia") merged.socialMedia = value;
-      else if (setting.key === "bankInfo") merged.bankInfo = value;
-      else if (setting.key === "legalPages") merged.legalPages = value;
-      else if (setting.key === "wholesaleNotice") merged.wholesaleNotice = value;
-    } catch {
-      // ignore parse errors
+    const merged = { ...DEFAULT_SETTINGS };
+    for (const setting of settings) {
+      try {
+        const value = JSON.parse(setting.value);
+        if (setting.key === "companyName") merged.companyName = value;
+        else if (setting.key === "logo") merged.logo = value;
+        else if (setting.key === "phone") merged.phone = value;
+        else if (setting.key === "whatsapp") merged.whatsapp = value;
+        else if (setting.key === "email") merged.email = value;
+        else if (setting.key === "address") merged.address = value;
+        else if (setting.key === "workingHours") merged.workingHours = value;
+        else if (setting.key === "socialMedia") merged.socialMedia = value;
+        else if (setting.key === "bankInfo") merged.bankInfo = value;
+        else if (setting.key === "legalPages") merged.legalPages = value;
+        else if (setting.key === "wholesaleNotice") merged.wholesaleNotice = value;
+      } catch {
+        // ignore parse errors
+      }
     }
+    return merged;
+  } catch {
+    return DEFAULT_SETTINGS;
   }
-  return merged;
 }
 
 export async function updateSiteSetting(key: string, value: unknown) {
