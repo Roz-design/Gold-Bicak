@@ -10,7 +10,11 @@ interface FlexibleImageProps {
 }
 
 function isRemoteUrl(src: string) {
-  return src.startsWith("http://") || src.startsWith("https://");
+  return (
+    src.startsWith("http://") ||
+    src.startsWith("https://") ||
+    src.startsWith("data:image/")
+  );
 }
 
 export default function FlexibleImage({

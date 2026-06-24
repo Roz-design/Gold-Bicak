@@ -1,6 +1,10 @@
 "use client";
 
 import { adminApiPath } from "@/lib/admin-path";
+import {
+  compressImageFileToDataUrl,
+  shouldUseDataUrlFallback,
+} from "@/lib/client-image";
 import { useState, useRef } from "react";
 import FlexibleImage from "@/components/ui/FlexibleImage";
 import { Upload, X, Loader2, Link2 } from "lucide-react";
@@ -22,11 +26,20 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  async function saveAsDataUrl(file: File) {
+    const dataUrl = await compressImageFileToDataUrl(file);
+    onChange(dataUrl);
+    setInfo("Görsel sıkıştırılarak kaydedildi (Blob depolama olmadan).");
+  }
 
   async function handleFile(file: File) {
     setUploading(true);
     setError("");
+    setInfo("");
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -45,9 +58,33 @@ export default function ImageUpload({
         return;
       }
 
-      setError(data?.error || `Yükleme başarısız (${res.status})`);
+      const message = data?.error || `Yükleme başarısız (${res.status})`;
+
+      if (shouldUseDataUrlFallback(res.status, message)) {
+        try {
+          await saveAsDataUrl(file);
+          return;
+        } catch (fallbackError) {
+          setError(
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : "Görsel kaydedilemedi"
+          );
+          return;
+        }
+      }
+
+      setError(message);
     } catch {
-      setError("Dosya yüklenirken hata oluştu");
+      try {
+        await saveAsDataUrl(file);
+      } catch (fallbackError) {
+        setError(
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : "Dosya yüklenirken hata oluştu"
+        );
+      }
     } finally {
       setUploading(false);
     }
@@ -147,6 +184,7 @@ export default function ImageUpload({
         </div>
       </div>
 
+      {info && <p className="mt-1 text-sm text-amber-700">{info}</p>}
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );
