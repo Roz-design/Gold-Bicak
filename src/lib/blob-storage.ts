@@ -1,19 +1,26 @@
 import { put } from "@vercel/blob";
 
-function getBlobStoreId() {
-  return (
-    process.env.BLOB_PUBLIC_STORE_ID?.trim() || process.env.BLOB_STORE_ID?.trim()
-  );
+function getPublicStoreId() {
+  return process.env.BLOB_PUBLIC_STORE_ID?.trim() || "";
 }
 
-/** Vercel OIDC (BLOB_STORE_ID) veya klasik token ile Blob kullanılabilir. */
+function getDefaultStoreId() {
+  return process.env.BLOB_STORE_ID?.trim() || "";
+}
+
+function getReadWriteToken() {
+  return process.env.BLOB_READ_WRITE_TOKEN?.trim() || "";
+}
+
+/** Vercel OIDC veya read-write token ile Blob kullanılabilir. */
 export function isBlobConfigured() {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim() || getBlobStoreId());
+  return Boolean(getPublicStoreId() || getReadWriteToken() || getDefaultStoreId());
 }
 
 export function getBlobAuthMode() {
-  if (getBlobStoreId()) return "oidc";
-  if (process.env.BLOB_READ_WRITE_TOKEN?.trim()) return "token";
+  if (getPublicStoreId()) return "public-store-id";
+  if (getReadWriteToken()) return "token";
+  if (getDefaultStoreId()) return "oidc";
   return "none";
 }
 
@@ -26,16 +33,37 @@ export async function uploadImageToBlob(
     throw new Error("BLOB_NOT_CONFIGURED");
   }
 
-  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  const storeId = getBlobStoreId();
+  const publicStoreId = getPublicStoreId();
+  const readWriteToken = getReadWriteToken();
+  const defaultStoreId = getDefaultStoreId();
 
   try {
+    // 1) Açıkça Public store ID verilmişse onu kullan
+    if (publicStoreId) {
+      return await put(storagePath, buffer, {
+        access: "public",
+        contentType,
+        addRandomSuffix: false,
+        storeId: publicStoreId,
+      });
+    }
+
+    // 2) Public store token'ı varsa storeId verme (Private BLOB_STORE_ID'yi ezmesin)
+    if (readWriteToken) {
+      return await put(storagePath, buffer, {
+        access: "public",
+        contentType,
+        addRandomSuffix: false,
+        token: readWriteToken,
+      });
+    }
+
+    // 3) Son çare: varsayılan OIDC store
     return await put(storagePath, buffer, {
       access: "public",
       contentType,
       addRandomSuffix: false,
-      ...(storeId ? { storeId } : {}),
-      ...(token ? { token } : {}),
+      storeId: defaultStoreId,
     });
   } catch (error) {
     console.error("[blob] Yükleme hatası:", error);

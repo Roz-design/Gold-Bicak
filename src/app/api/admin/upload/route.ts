@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
       if (error.message === "BLOB_PRIVATE_STORE") {
         return apiError(
-          "Projede hâlâ Private Blob store bağlı. Public store oluşturun, Store ID'yi BLOB_PUBLIC_STORE_ID olarak ekleyin veya Private store bağlantısını kaldırın.",
+          "Hâlâ Private Blob store kullanılıyor. Public store'a Connect ederken 'read-write token' kutusunu işaretleyin, Redeploy yapın. Veya Public Store ID'yi BLOB_PUBLIC_STORE_ID olarak ekleyin.",
           502
         );
       }
