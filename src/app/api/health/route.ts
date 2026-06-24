@@ -33,6 +33,7 @@ export async function GET() {
       blobAuth,
       hasPublicStoreId: Boolean(process.env.BLOB_PUBLIC_STORE_ID?.trim()),
       hasReadWriteToken: Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim()),
+      hasBlobStoreId: Boolean(process.env.BLOB_STORE_ID?.trim()),
     });
   } catch (error) {
     return NextResponse.json(
