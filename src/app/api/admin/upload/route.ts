@@ -4,7 +4,7 @@ import path from "path";
 import { requireAdmin } from "@/lib/auth";
 import { apiError, apiSuccess } from "@/lib/api";
 import { handleAdminError } from "@/lib/admin-api";
-import { isBlobConfigured, uploadImageToBlob } from "@/lib/blob-storage";
+import { getBlobAuthMode, isBlobConfigured, uploadImageToBlob } from "@/lib/blob-storage";
 import {
   isHeicLike,
   resolveUploadedImageExtension,

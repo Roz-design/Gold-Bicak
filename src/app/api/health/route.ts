@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getBlobAuthMode, isBlobConfigured } from "@/lib/blob-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +23,9 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
     const kind = databaseUrl.startsWith("file:") ? "sqlite" : "postgresql";
-    const blobConfigured = Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
-    return NextResponse.json({ ok: true, database: "connected", kind, blobConfigured });
+    const blobConfigured = isBlobConfigured();
+    const blobAuth = getBlobAuthMode();
+    return NextResponse.json({ ok: true, database: "connected", kind, blobConfigured, blobAuth });
   } catch (error) {
     return NextResponse.json(
       {
