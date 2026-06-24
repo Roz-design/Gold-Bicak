@@ -1,26 +1,64 @@
 import { put } from "@vercel/blob";
 
-function getPublicStoreId() {
-  return process.env.BLOB_PUBLIC_STORE_ID?.trim() || "";
+function findEnvValue(...candidates: string[]) {
+  for (const key of candidates) {
+    const value = process.env[key]?.trim();
+    if (value) return value;
+  }
+  return "";
 }
 
-function getDefaultStoreId() {
-  return process.env.BLOB_STORE_ID?.trim() || "";
+function findEnvBySuffix(suffix: string) {
+  for (const [key, value] of Object.entries(process.env)) {
+    if (key.endsWith(suffix) && value?.trim()) {
+      return { key, value: value.trim() };
+    }
+  }
+  return null;
+}
+
+function getPublicStoreId() {
+  const direct = findEnvValue("BLOB_PUBLIC_STORE_ID", "BLOB_STORE_ID");
+  if (direct) return direct;
+
+  const match = findEnvBySuffix("_STORE_ID");
+  return match?.value ?? "";
 }
 
 function getReadWriteToken() {
-  return process.env.BLOB_READ_WRITE_TOKEN?.trim() || "";
+  const direct = findEnvValue("BLOB_READ_WRITE_TOKEN");
+  if (direct) return direct;
+
+  const match =
+    findEnvBySuffix("_READ_WRITE_TOKEN") ?? findEnvBySuffix("_BLOB_READ_WRITE_TOKEN");
+  return match?.value ?? "";
+}
+
+export function getBlobEnvDebug() {
+  const storeMatch = findEnvBySuffix("_STORE_ID");
+  const tokenMatch =
+    findEnvBySuffix("_READ_WRITE_TOKEN") ?? findEnvBySuffix("_BLOB_READ_WRITE_TOKEN");
+
+  return {
+    storeEnvKey: process.env.BLOB_PUBLIC_STORE_ID
+      ? "BLOB_PUBLIC_STORE_ID"
+      : process.env.BLOB_STORE_ID
+        ? "BLOB_STORE_ID"
+        : storeMatch?.key ?? null,
+    tokenEnvKey: process.env.BLOB_READ_WRITE_TOKEN
+      ? "BLOB_READ_WRITE_TOKEN"
+      : tokenMatch?.key ?? null,
+  };
 }
 
 /** Vercel OIDC veya read-write token ile Blob kullanılabilir. */
 export function isBlobConfigured() {
-  return Boolean(getPublicStoreId() || getReadWriteToken() || getDefaultStoreId());
+  return Boolean(getPublicStoreId() || getReadWriteToken());
 }
 
 export function getBlobAuthMode() {
-  if (getPublicStoreId()) return "public-store-id";
   if (getReadWriteToken()) return "token";
-  if (getDefaultStoreId()) return "oidc";
+  if (getPublicStoreId()) return "oidc";
   return "none";
 }
 
@@ -35,20 +73,8 @@ export async function uploadImageToBlob(
 
   const publicStoreId = getPublicStoreId();
   const readWriteToken = getReadWriteToken();
-  const defaultStoreId = getDefaultStoreId();
 
   try {
-    // 1) Açıkça Public store ID verilmişse onu kullan
-    if (publicStoreId) {
-      return await put(storagePath, buffer, {
-        access: "public",
-        contentType,
-        addRandomSuffix: false,
-        storeId: publicStoreId,
-      });
-    }
-
-    // 2) Public store token'ı varsa storeId verme (Private BLOB_STORE_ID'yi ezmesin)
     if (readWriteToken) {
       return await put(storagePath, buffer, {
         access: "public",
@@ -58,12 +84,11 @@ export async function uploadImageToBlob(
       });
     }
 
-    // 3) Son çare: varsayılan OIDC store
     return await put(storagePath, buffer, {
       access: "public",
       contentType,
       addRandomSuffix: false,
-      storeId: defaultStoreId,
+      storeId: publicStoreId,
     });
   } catch (error) {
     console.error("[blob] Yükleme hatası:", error);
