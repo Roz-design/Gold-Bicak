@@ -25,7 +25,15 @@ export async function GET() {
     const kind = databaseUrl.startsWith("file:") ? "sqlite" : "postgresql";
     const blobConfigured = isBlobConfigured();
     const blobAuth = getBlobAuthMode();
-    return NextResponse.json({ ok: true, database: "connected", kind, blobConfigured, blobAuth });
+    const usesPublicStoreOverride = Boolean(process.env.BLOB_PUBLIC_STORE_ID?.trim());
+    return NextResponse.json({
+      ok: true,
+      database: "connected",
+      kind,
+      blobConfigured,
+      blobAuth,
+      usesPublicStoreOverride,
+    });
   } catch (error) {
     return NextResponse.json(
       {

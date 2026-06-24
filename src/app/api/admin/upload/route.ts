@@ -78,6 +78,13 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      if (error.message === "BLOB_PRIVATE_STORE") {
+        return apiError(
+          "Projede hâlâ Private Blob store bağlı. Public store oluşturun, Store ID'yi BLOB_PUBLIC_STORE_ID olarak ekleyin veya Private store bağlantısını kaldırın.",
+          502
+        );
+      }
+
       if (error.message.startsWith("BLOB_UPLOAD_FAILED:")) {
         return apiError(
           `Blob'a yüklenemedi: ${error.message.replace("BLOB_UPLOAD_FAILED:", "")}. Store'un Public olduğundan emin olun.`,
