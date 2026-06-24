@@ -32,14 +32,20 @@ export default function ImageUpload({
       formData.append("file", file);
       formData.append("folder", folder);
 
-      const res = await fetch(adminApiPath("/upload"), { method: "POST", body: formData });
-      const data = await res.json();
+      const res = await fetch(adminApiPath("/upload"), {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+      });
 
-      if (data.success) {
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success) {
         onChange(data.data.url);
-      } else {
-        setError(data.error || "Yükleme başarısız");
+        return;
       }
+
+      setError(data?.error || `Yükleme başarısız (${res.status})`);
     } catch {
       setError("Dosya yüklenirken hata oluştu");
     } finally {
@@ -58,7 +64,7 @@ export default function ImageUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.jpg,.jpeg,.png,.webp,.gif,.svg"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
