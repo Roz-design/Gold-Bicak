@@ -1,10 +1,6 @@
 "use client";
 
 import { adminApiPath } from "@/lib/admin-path";
-import {
-  compressImageFileToDataUrl,
-  shouldUseDataUrlFallback,
-} from "@/lib/client-image";
 import { useState, useRef } from "react";
 import FlexibleImage from "@/components/ui/FlexibleImage";
 import { Upload, X, Loader2, Link2 } from "lucide-react";
@@ -29,12 +25,6 @@ export default function ImageUpload({
   const [info, setInfo] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  async function saveAsDataUrl(file: File) {
-    const dataUrl = await compressImageFileToDataUrl(file);
-    onChange(dataUrl);
-    setInfo("Görsel sıkıştırılarak kaydedildi (Blob depolama olmadan).");
-  }
-
   async function handleFile(file: File) {
     setUploading(true);
     setError("");
@@ -55,36 +45,15 @@ export default function ImageUpload({
 
       if (res.ok && data?.success) {
         onChange(data.data.url);
+        if (data.data.storage === "blob") {
+          setInfo("Görsel Blob depolamaya yüklendi.");
+        }
         return;
       }
 
-      const message = data?.error || `Yükleme başarısız (${res.status})`;
-
-      if (shouldUseDataUrlFallback(res.status, message)) {
-        try {
-          await saveAsDataUrl(file);
-          return;
-        } catch (fallbackError) {
-          setError(
-            fallbackError instanceof Error
-              ? fallbackError.message
-              : "Görsel kaydedilemedi"
-          );
-          return;
-        }
-      }
-
-      setError(message);
+      setError(data?.error || `Yükleme başarısız (${res.status})`);
     } catch {
-      try {
-        await saveAsDataUrl(file);
-      } catch (fallbackError) {
-        setError(
-          fallbackError instanceof Error
-            ? fallbackError.message
-            : "Dosya yüklenirken hata oluştu"
-        );
-      }
+      setError("Bağlantı hatası. Wi-Fi deneyin ve tekrar yükleyin.");
     } finally {
       setUploading(false);
     }
@@ -153,7 +122,7 @@ export default function ImageUpload({
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            Bilgisayardan fotoğraf yükle
+            Fotoğraf yükle
           </button>
 
           <div>
@@ -184,7 +153,7 @@ export default function ImageUpload({
         </div>
       </div>
 
-      {info && <p className="mt-1 text-sm text-amber-700">{info}</p>}
+      {info && <p className="mt-1 text-sm text-green-700">{info}</p>}
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );

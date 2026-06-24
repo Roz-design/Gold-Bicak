@@ -22,7 +22,8 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
     const kind = databaseUrl.startsWith("file:") ? "sqlite" : "postgresql";
-    return NextResponse.json({ ok: true, database: "connected", kind });
+    const blobConfigured = Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+    return NextResponse.json({ ok: true, database: "connected", kind, blobConfigured });
   } catch (error) {
     return NextResponse.json(
       {
